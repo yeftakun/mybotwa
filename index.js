@@ -1,5 +1,10 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const readline = require('readline');
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+app.use(bodyParser.json());
 
 const client = new Client({
     authStrategy: new LocalAuth()
@@ -12,42 +17,29 @@ client.on('qr', (qr) => {
 
 client.on('ready', async () => {
     console.log('Bot sudah terhubung!');
+});
 
-    const targetNumber = '628123456789@c.us';
+app.post('/send-message', async (req, res) => {
+    const { number, message } = req.body;
+
+    const targetNumber = `${number}@c.us`;
 
     // Periksa apakah nomor terdaftar di WhatsApp
     const isRegistered = await client.isRegisteredUser(targetNumber);
     if (isRegistered) {
-        console.log('Nomor ditemukan, mengirim pesan...');
         try {
-            await client.sendMessage(targetNumber, 'Pesan otomatis dari bot!');
-            console.log('Pesan berhasil dikirim!');
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-
-        rl.on('line', async (input) => {
-            if (input.trim().toLowerCase() === 'p') {
-                console.log('Mengirim pesan lagi...');
-                try {
-                    await client.sendMessage(targetNumber, 'Pesan otomatis dari bot!');
-                    console.log('Pesan berhasil dikirim!');
-                } catch (err) {
-                    console.error('Gagal mengirim pesan:', err);
-                }
-            }
-        });
-        } catch (err) {
-            console.error('Gagal mengirim pesan:', err);
+            await client.sendMessage(targetNumber, message);
+            res.status(200).json({ status: 'success', message: `Pesan berhasil dikirim ke ${number}` });
+        } catch (error) {
+            res.status(500).json({ status: 'error', message: `Gagal mengirim pesan ke ${number}` });
         }
     } else {
-        console.log('Nomor tidak ditemukan di WhatsApp.');
+        res.status(404).json({ status: 'error', message: `${number} tidak ditemukan di WhatsApp.` });
     }
 });
 
-client.on('disconnected', (reason) => {
-    console.log('Bot terputus:', reason);
-});
-
 client.initialize();
+
+app.listen(3000, () => {
+    console.log('Server berjalan di http://localhost:3000');
+});
