@@ -29,12 +29,12 @@ app.post('/send-message', async (req, res) => {
     if (isRegistered) {
         try {
             await client.sendMessage(targetNumber, message);
-            res.status(200).json({ status: 'success', message: `Pesan berhasil dikirim ke ${number}` });
+            res.status(200).json({ status: 'success', message: `Terkirim ke ${number}` });
         } catch (error) {
-            res.status(500).json({ status: 'error', message: `Gagal mengirim pesan ke ${number}` });
+            res.status(500).json({ status: 'error', message: `Gagal terkirim ke ${number}` });
         }
     } else {
-        res.status(404).json({ status: 'error', message: `${number} tidak ditemukan di WhatsApp.` });
+        res.status(404).json({ status: 'error', message: `${number} tidak ada di WhatsApp.` });
     }
 });
 
