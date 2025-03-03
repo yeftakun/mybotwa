@@ -1,6 +1,6 @@
 // Konfigurasi
-const botName = '@shironeko';
-const ownerBotIG = 'yeftaasyel_';
+const botName = '@yourbotname';
+const ownerBotIG = 'your_IG_username';
 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const express = require('express');
