@@ -5,3 +5,5 @@ Menggunakan npm secara lokal:
 ```
 npx npm ...
 ```
+
+Install dulu `requirement\font\impact.ttf`
