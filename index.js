@@ -1,6 +1,9 @@
 // Konfigurasi
-const botName = '@yourbotname';
-const ownerBotIG = 'your_IG_username';
+require('dotenv').config(); // Load konfigurasi dari .env
+const botName = '@hehe';
+const ownerBotIG = 'hehe';
+const adminPage = 'http://localhost:3000/admin';
+const landingPgLink = 'https://yeftakun.github.io/mybotwa';
 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const express = require('express');
@@ -8,11 +11,13 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
-const { createCanvas, loadImage } = require('canvas'); // Untuk menambahkan teks ke gambar
-const os = require('os'); // Modul untuk mendapatkan info sistem
+const os = require('os');
+const { createCanvas, loadImage } = require('canvas'); // Untuk teks di gambar
 
 const app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true })); // Untuk parsing form
+app.set('view engine', 'ejs'); // Gunakan EJS
+app.use(express.static('public')); // Untuk file statis (CSS)
 
 // Simpan waktu saat bot dimulai
 const botStartTime = Date.now();
@@ -28,6 +33,45 @@ client.on('qr', (qr) => {
 
 client.on('ready', async () => {
     console.log('Bot sudah terhubung!');
+    console.log('Matikan bot lewat: ', adminPage);
+
+    // Ubah status "About" bot
+    try {
+        await client.setStatus("🤖 Online");
+        // console.log("Status bot berhasil diubah.");
+    } catch (error) {
+        console.error("Gagal mengubah status bot:", error);
+    }
+});
+
+// ROUTING: Halaman Admin Panel
+app.get('/admin', (req, res) => {
+    res.render('admin', { uptime: getBotUptime(), error: null });
+});
+
+// ROUTING: Handle form untuk terminate bot
+app.post('/terminate', async (req, res) => {
+    const password = req.body.password;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (password !== adminPassword) {
+        return res.render('admin', { uptime: getBotUptime(), error: "Password salah!" });
+    }
+
+    console.log("Bot sedang dimatikan melalui panel admin...");
+    try {
+        await client.setStatus("❌ Bot offline");
+        console.log("Status bot berhasil diubah menjadi Offline.");
+    } catch (error) {
+        console.error("Gagal mengubah status bot:", error);
+    }
+
+    // Redirect ke GitHub Pages sebelum bot mati
+    res.redirect(landingPgLink);
+
+    setTimeout(() => {
+        process.exit();
+    }, 2000);
 });
 
 // Fungsi untuk mendapatkan informasi server
@@ -148,9 +192,11 @@ client.on('message', async (msg) => {
         const uptime = getBotUptime();
         const info = `*Selamat datang di Shironeko Bot🤖*
 
-🔧 *Fitur:*
-- Gambar dengan caption ".s": membuat stiker dari gambar yang dikirim.
-- Gambar dengan caption ".smeme Caption1|Caption2": membuat stiker dengan caption.
+🔧 *Command:*
+- *.s*: Stiker
+- *.smeme Caption1|Caption2:* Stiker dengan caption
+- *.info*: Informasi bot
+- *.owner*: Owner bot
 
 📡 *Hosted at:*
 ${serverInfo}
