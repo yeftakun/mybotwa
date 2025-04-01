@@ -1,6 +1,6 @@
 // Konfigurasi
 require('dotenv').config(); // Load konfigurasi dari .env
-const botName = 'Shironeko';
+const botName = '@shironeko';
 const ownerBotIG = 'yeftaasyel_';
 const adminPage = 'http://localhost:3000/admin';
 const landingPgLink = 'https://yeftakun.github.io/mybotwa';
